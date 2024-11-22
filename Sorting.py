@@ -81,7 +81,7 @@ def quick_sort(arr):
 
 # Insertion Sort
 def insertion_sort(arr):
-    # Iterates through the array for potential swaps
+    # Iterates through the array for potential insertions
     for i in range(1, len(arr)):
         key = arr[i]
         j = i - 1
@@ -243,7 +243,6 @@ def main():
 
     # Print statements for algorithm selection
     print("Choose a sorting algorithm:")
-    print("0. Recommended")
     print("1. MergeSort")
     print("2. HeapSort")
     print("3. QuickSort")
@@ -306,11 +305,7 @@ def main():
     else:
         sorted_arr = arr
         # Selects the chosen algorithm
-        if choice == 0:
-            algorithm_name = "MergeSort"
-            sort_function = merge_sort
-            sorted_arr = merge_sort(arr)
-        elif choice == 1:
+        if choice == 1:
             algorithm_name = "MergeSort"
             sort_function = merge_sort
             sorted_arr = merge_sort(arr)
