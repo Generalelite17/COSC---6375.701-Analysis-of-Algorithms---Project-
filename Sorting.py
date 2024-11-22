@@ -147,7 +147,7 @@ def main():
         arr = list(map(int, arr_input_cleaned.split()))
 
     elif array_choice == '2':
-        # Input size for random array and range of values (min and max integers)
+        # Inputs size for random array and range of values (min and max integers)
         size_and_range = input("Enter the array size, minimum value, and maximum value, separated by spaces: ")
 
         # Splits input into size and range values
@@ -175,7 +175,7 @@ def main():
         print("\nSorting with all...")
 
         with ThreadPoolExecutor() as executor:
-            # Prepare the tasks for each sorting algorithm
+            # Prepares the tasks for each sorting algorithm
             futures = {
                 "MergeSort": executor.submit(test_sorting_algorithm, merge_sort, arr.copy()),
                 "HeapSort": executor.submit(test_sorting_algorithm, heap_sort, arr.copy()),
