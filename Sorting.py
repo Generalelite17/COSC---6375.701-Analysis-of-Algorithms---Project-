@@ -1,6 +1,9 @@
+# Imported packages
 import random
 import time
 import sys
+import re
+from concurrent.futures import ThreadPoolExecutor
 
 # MergeSort
 def merge_sort(arr):
@@ -33,7 +36,7 @@ def merge_sort(arr):
             k += 1
     return arr
 
-# HeapSort
+# HeapSort helper function
 def heapify(arr, n, i):
     largest = i
     left = 2 * i + 1
@@ -49,6 +52,7 @@ def heapify(arr, n, i):
         arr[i], arr[largest] = arr[largest], arr[i]
         heapify(arr, n, largest)
 
+# HeapSort
 def heap_sort(arr):
     n = len(arr)
 
@@ -80,7 +84,7 @@ def insertion_sort(arr):
         arr[j + 1] = key
     return arr
 
-# Radix Sort
+# Radix Sort helper function
 def counting_sort(arr, exp):
     n = len(arr)
     output = [0] * n
@@ -101,6 +105,7 @@ def counting_sort(arr, exp):
     for i in range(n):
         arr[i] = output[i]
 
+# Radix Sort
 def radix_sort(arr):
     max_num = max(arr)
     exp = 1
@@ -111,9 +116,9 @@ def radix_sort(arr):
 
 # Function to test the sorting algorithms
 def test_sorting_algorithm(sort_function, arr):
-    start_time = time.time()
+    start_time = time.perf_counter()
     sort_function(arr)
-    end_time = time.time()
+    end_time = time.perf_counter()
     return end_time - start_time
 
 # Main program
@@ -124,47 +129,111 @@ def main():
     print("3. QuickSort")
     print("4. Insertion Sort")
     print("5. Radix Sort")
-
+    print("6. All")
+    print()
     choice = int(input("Enter the number of the algorithm you want to use: "))
-    size = int(input("Enter the size of the array to sort: "))
 
-    # Generate random array
-    arr = [random.randint(0, 100000) for _ in range(size)]
+    # Asks user if they want to input their own array or generate a random array
+    array_choice = input("Do you want to (1) input your own array or (2) generate a random array? (Enter 1 or 2): ")
 
-    # Print the unsorted array
-    print("\nUnsorted array:")
-    print(arr)
+    if array_choice == '1':
+        # Inputs custom array and ignores commas, special characters, and letters
+        arr_input = input("Enter the elements of the array, separated by spaces or commas: ")
 
-    # Select the chosen algorithm
-    if choice == 1:
-        algorithm_name = "MergeSort"
-        sort_function = merge_sort
-    elif choice == 2:
-        algorithm_name = "HeapSort"
-        sort_function = heap_sort
-    elif choice == 3:
-        algorithm_name = "QuickSort"
-        sort_function = quick_sort
-    elif choice == 4:
-        algorithm_name = "Insertion Sort"
-        sort_function = insertion_sort
-    elif choice == 5:
-        algorithm_name = "Radix Sort"
-        sort_function = radix_sort
+        # Replaces commas with spaces, then removes all non-numeric characters (letters, symbols, etc.)
+        arr_input_cleaned = re.sub(r'[^0-9\s]', '', arr_input)
+
+        # Splits the cleaned string by spaces and converts to integers
+        arr = list(map(int, arr_input_cleaned.split()))
+
+    elif array_choice == '2':
+        # Input size for random array and range of values (min and max integers)
+        size_and_range = input("Enter the array size, minimum value, and maximum value, separated by spaces: ")
+
+        # Splits input into size and range values
+        try:
+            size, min_val, max_val = map(int, size_and_range.split())
+            if min_val > max_val:
+                print("Invalid range! min_value must be less than or equal to max_value.")
+                sys.exit(1)
+            # Generates the random array with specified size and range
+            arr = [random.randint(min_val, max_val) for _ in range(size)]
+        except ValueError:
+            print("Invalid input! Please enter the size and range as integers separated by spaces.")
+            sys.exit(1)
+
     else:
         print("Invalid choice!")
         sys.exit(1)
 
-    # Measure and display the time taken to sort
-    print(f"\nSorting with {algorithm_name}...")
-    elapsed_time = test_sorting_algorithm(sort_function, arr)
-
-    # Print the sorted array
-    print("\nSorted array:")
+    # Prints the unsorted array
+    print("\nUnsorted array:")
     print(arr)
 
-    # Print the time taken
-    print(f"\nTime taken: {elapsed_time:.6f} seconds.")
+    if choice == 6:
+        # Runs all algorithms in parallel using ThreadPoolExecutor
+        print("\nSorting with all...")
+
+        with ThreadPoolExecutor() as executor:
+            # Prepare the tasks for each sorting algorithm
+            futures = {
+                "MergeSort": executor.submit(test_sorting_algorithm, merge_sort, arr.copy()),
+                "HeapSort": executor.submit(test_sorting_algorithm, heap_sort, arr.copy()),
+                "QuickSort": executor.submit(test_sorting_algorithm, quick_sort, arr.copy()),
+                "Insertion Sort": executor.submit(test_sorting_algorithm, insertion_sort, arr.copy()),
+                "Radix Sort": executor.submit(test_sorting_algorithm, radix_sort, arr.copy())
+            }
+
+            # Collects results and times in a dictionary
+            times = {}
+            for algorithm, future in futures.items():
+                elapsed_time = future.result()
+                times[algorithm] = elapsed_time
+
+            # Sorts the sorting algorithms based on their completion times (from quickest to slowest)
+            sorted_algorithms = sorted(times.items(), key=lambda x: x[1])
+
+            # Prints the sorted times and corresponding algorithms
+            print("\nSorting methods and their completion times (quickest to slowest):")
+            for algorithm, elapsed_time in sorted_algorithms:
+                print(f"{algorithm} took {elapsed_time:.6f} seconds.")
+
+            # After all sorting algorithms are complete, prints the sorted array (from any algorithm)
+            sorted_arr = merge_sort(arr.copy())  # You can use any sorted result here
+            print("\nSorted array:")
+            print(sorted_arr)
+
+    else:
+        # Selects the chosen algorithm
+        if choice == 1:
+            algorithm_name = "MergeSort"
+            sort_function = merge_sort
+        elif choice == 2:
+            algorithm_name = "HeapSort"
+            sort_function = heap_sort
+        elif choice == 3:
+            algorithm_name = "QuickSort"
+            sort_function = quick_sort
+        elif choice == 4:
+            algorithm_name = "Insertion Sort"
+            sort_function = insertion_sort
+        elif choice == 5:
+            algorithm_name = "Radix Sort"
+            sort_function = radix_sort
+        else:
+            print("Invalid choice!")
+            sys.exit(1)
+
+        # Measures and displays the time taken to sort
+        print(f"\nSorting with {algorithm_name}...")
+        elapsed_time = test_sorting_algorithm(sort_function, arr)
+
+        # Prints the time taken
+        print(f"\nTime taken: {elapsed_time:.6f} seconds.")
+
+        # Prints the sorted array
+        print("\nSorted array:")
+        print(arr)
 
 if __name__ == "__main__":
     main()
