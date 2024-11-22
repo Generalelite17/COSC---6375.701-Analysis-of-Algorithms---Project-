@@ -154,9 +154,12 @@ def main():
         try:
             size, min_val, max_val = map(int, size_and_range.split())
             if min_val > max_val:
-                print("Invalid range! min_value must be less than or equal to max_value.")
-                sys.exit(1)
+                print("Invalid range! The min_value must be less than or equal to the max_value.")
             # Generates the random array with specified size and range
+            if size < 0:
+                print("Invalid array size! The array size must be nonnegative.")
+            if min_val > max_val or size < 0:
+                sys.exit(1)
             arr = [random.randint(min_val, max_val) for _ in range(size)]
         except ValueError:
             print("Invalid input! Please enter the size and range as integers separated by spaces.")
@@ -214,6 +217,7 @@ def main():
         elif choice == 3:
             algorithm_name = "QuickSort"
             sort_function = quick_sort
+            sorted_arr = quick_sort(arr)  # Capture the sorted result from QuickSort
         elif choice == 4:
             algorithm_name = "Insertion Sort"
             sort_function = insertion_sort
@@ -226,14 +230,19 @@ def main():
 
         # Measures and displays the time taken to sort
         print(f"\nSorting with {algorithm_name}...")
-        elapsed_time = test_sorting_algorithm(sort_function, arr)
 
-        # Prints the time taken
-        print(f"\nTime taken: {elapsed_time:.6f} seconds.")
+        # For QuickSort, we already captured the sorted array in 'sorted_arr'
+        if choice != 3:
+            elapsed_time = test_sorting_algorithm(sort_function, arr)
+            print(f"\nTime taken: {elapsed_time:.6f} seconds.")
+            sorted_arr = arr  # For all other algorithms, 'arr' is modified in place
+        else:
+            elapsed_time = test_sorting_algorithm(sort_function, arr)
+            print(f"\nTime taken: {elapsed_time:.6f} seconds.")
 
         # Prints the sorted array
         print("\nSorted array:")
-        print(arr)
+        print(sorted_arr)  # noqa: specific-warning-code
 
 if __name__ == "__main__":
     main()
