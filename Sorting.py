@@ -134,7 +134,6 @@ def radix_sort(arr):
 
         # Finds the maximum value (absolute value) to determine the number of digits
         max_val = max(nums, key=lambda x: abs(x))
-
         # Finds the scaling factor (based on decimal places)
         scale_factor = 10 ** max(len(str(abs(x)).split('.')[1]) if '.' in str(abs(x)) else 0 for x in nums)
 
@@ -143,22 +142,14 @@ def radix_sort(arr):
         while max_val * scale_factor // exp > 1:
             counting_sort(nums, exp, scale_factor)
             exp *= 10
-
         return nums
 
-    # Sorts the positive numbers as they are
+    # Sorts the positive and negative portions of the array
     sorted_positive = sort_numbers(positive_numbers)
-
-    # Sorts the negative numbers by first converting them to positive for sorting
     sorted_negative = sort_numbers([-num for num in negative_numbers])
-
-    # Restores the negative signs on sorted negative numbers
     sorted_negative = [-num for num in sorted_negative]
-
-    # Reverses the sorted negative array to get the largest negative values first
     sorted_negative.reverse()
 
-    # Concatenates the negative and positive numbers
     return sorted_negative + sorted_positive
 
 # Function to test the sorting algorithms
